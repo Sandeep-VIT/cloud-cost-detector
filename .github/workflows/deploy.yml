@@ -1,0 +1,59 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run tests
+        run: pytest tests/
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo apt update -y
+            sudo apt install -y docker.io git
+            sudo systemctl start docker
+
+            cd /home/ubuntu
+
+            if [ -d "cloud-cost-detector" ]; then
+              cd cloud-cost-detector
+              git pull
+            else
+              git clone https://github.com/Sandeep-VIT/cloud-cost-detector.git
+              cd cloud-cost-detector
+            fi
+
+            sudo docker stop $(sudo docker ps -q) || true
+            sudo docker rm $(sudo docker ps -a -q) || true
+
+            sudo docker build -t cloud-cost-detector .
+            sudo docker run -d -p 5000:5000 --name cloud-app cloud-cost-detector
