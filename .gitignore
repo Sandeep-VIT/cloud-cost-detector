@@ -1,0 +1,45 @@
+﻿# Python virtual environments
+venv/
+conda_venv/
+.venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Environment / secrets
+.env
+*.pem
+*.key
+*.p12
+*.pfx
+cloud-key.pem
+
+# Build artifacts and logs  
+pip_out.txt
+*.log
+*.txt.bak
+dist/
+build/
+*.egg-info/
+
+# IDE and OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Pytest / test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit cache
+.streamlit/
